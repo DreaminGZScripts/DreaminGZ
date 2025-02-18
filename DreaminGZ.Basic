@@ -1,0 +1,816 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+   Name = "DreaminGZ.Basic",
+   Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
+   LoadingTitle = "DreaminGZ",
+   LoadingSubtitle = "Powered by : DreaminGZ Scripts",
+   Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
+
+   DisableRayfieldPrompts = false,
+   DisableBuildWarnings = false, -- Prevents Rayfield from warning when the script has a version mismatch with the interface
+
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = nil, -- Create a custom folder for your hub/game
+      FileName = "dreamingz Hub"
+   },
+
+   Discord = {
+      Enabled = true, -- Prompt the user to join your Discord server if their executor supports it
+      Invite = "PURf8zGjcU", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ ABCD would be ABCD
+      RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+   },
+
+   KeySystem = true, -- Set this to true to use our key system
+   KeySettings = {
+      Title = "DreaminGZ Key",
+      Subtitle = "Key System",
+      Note = "Key can be found in discord", -- Use this to tell the user how to get a key
+      FileName = "Key", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
+      SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
+      GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
+      Key = {"DREAM"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
+   }
+})
+
+local MainTab = Window:CreateTab("Character", nil) -- Title, Image
+local Section = MainTab:CreateSection("Character")
+
+local Button = MainTab:CreateButton({
+   Name = "Fly (SOON)",
+   Callback = function()
+   -- Press X to fly
+
+local plr = game.Players.LocalPlayer
+	local mouse = plr:GetMouse()
+
+	localplayer = plr
+
+	if workspace:FindFirstChild("Core") then
+		workspace.Core:Destroy()
+	end
+
+	local Core = Instance.new("Part")
+	Core.Name = "Core"
+	Core.Size = Vector3.new(0.05, 0.05, 0.05)
+
+	spawn(function()
+		Core.Parent = workspace
+		local Weld = Instance.new("Weld", Core)
+		Weld.Part0 = Core
+		Weld.Part1 = localplayer.Character.LowerTorso
+		Weld.C0 = CFrame.new(0, 0, 0)
+	end)
+
+	workspace:WaitForChild("Core")
+
+	local torso = workspace.Core
+	flying = true
+	local speed=50
+	local keys={a=false,d=false,w=false,s=false}
+	local e1
+	local e2
+	local function start()
+		local pos = Instance.new("BodyPosition",torso)
+		local gyro = Instance.new("BodyGyro",torso)
+		pos.Name="EPIXPOS"
+		pos.maxForce = Vector3.new(math.huge, math.huge, math.huge)
+		pos.position = torso.Position
+		gyro.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+		gyro.cframe = torso.CFrame
+		repeat
+			wait()
+			localplayer.Character.Humanoid.PlatformStand=true
+			local new=gyro.cframe - gyro.cframe.p + pos.position
+			if not keys.w and not keys.s and not keys.a and not keys.d then
+				speed=50
+			end
+			if keys.w then
+				new = new + workspace.CurrentCamera.CoordinateFrame.lookVector * speed
+				speed=speed+50
+			end
+			if keys.s then
+				new = new - workspace.CurrentCamera.CoordinateFrame.lookVector * speed
+				speed=speed+50
+			end
+			if keys.d then
+				new = new * CFrame.new(speed,0,0)
+				speed=speed+0
+			end
+			if keys.a then
+				new = new * CFrame.new(-speed,0,0)
+				speed=speed+50
+			end
+			if speed>10 then
+				speed=5
+			end
+			pos.position=new.p
+			if keys.w then
+				gyro.cframe = workspace.CurrentCamera.CoordinateFrame*CFrame.Angles(-math.rad(speed*0),0,0)
+			elseif keys.s then
+				gyro.cframe = workspace.CurrentCamera.CoordinateFrame*CFrame.Angles(math.rad(speed*0),0,0)
+			else
+				gyro.cframe = workspace.CurrentCamera.CoordinateFrame
+			end
+		until flying == false
+		if gyro then gyro:Destroy() end
+		if pos then pos:Destroy() end
+		flying=false
+		localplayer.Character.Humanoid.PlatformStand=false
+		speed=10
+	end
+	e1=mouse.KeyDown:connect(function(key)
+		if not torso or not torso.Parent then flying=false e1:disconnect() e2:disconnect() return end
+		if key=="w" then
+			keys.w=true
+		elseif key=="s" then
+			keys.s=true
+		elseif key=="a" then
+			keys.a=true
+		elseif key=="d" then
+			keys.d=true
+		elseif key=="x" then
+			if flying==true then
+				flying=false
+			else
+				flying=true
+				start()
+			end
+		end
+	end)
+	e2=mouse.KeyUp:connect(function(key)
+		if key=="w" then
+			keys.w=false
+		elseif key=="s" then
+			keys.s=false
+		elseif key=="a" then
+			keys.a=false
+		elseif key=="d" then
+			keys.d=false
+		end
+	end)
+   end,
+})
+
+local Slider = MainTab:CreateSlider({
+   Name = "Walkspeed Slider",
+   Range = {16, 500},
+   Increment = 1,
+   Suffix = "Speed",
+   CurrentValue = 16,
+   Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+		game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = (Value)
+   end,
+})
+
+local Toggle = MainTab:CreateToggle({
+   Name = "Infinite Jump",
+   CurrentValue = false,
+   Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+  local InfiniteJumpEnabled = true
+game:GetService("UserInputService").JumpRequest:connect(function()
+	if InfiniteJumpEnabled then
+		game:GetService"Players".LocalPlayer.Character:FindFirstChildOfClass'Humanoid':ChangeState("Jumping")
+	end
+end)
+local InfiniteJump = CreateButton("Infinite Jump: On", StuffFrame)
+InfiniteJump.Position = UDim2.new(0,10,0,130)
+InfiniteJump.Size = UDim2.new(0,150,0,30)
+InfiniteJump.MouseButton1Click:connect(function()
+	local state = InfiniteJump.Text:sub(string.len("Infinite Jump: ") + 1) --too lazy to count lol
+	local new = state == "Off" and "On" or state == "On" and "Off"
+	InfiniteJumpEnabled = new == "On"
+	InfiniteJump.Text = "Infinite Jump: " .. new
+end)
+   end,
+})
+
+local Toggle = MainTab:CreateToggle({
+   Name = "Noclip",
+   CurrentValue = false,
+   Flag = "Toggle2", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+	local runservice = game:GetService("RunService")
+
+	local player = game:GetService("Players").LocalPlayer
+
+	runservice.Stepped:Connect(function()
+	for i,v in pairs(player.Character:GetDescendants()) do
+		if v:IsA("BasePart") then
+			v.CanCollide = false
+		end
+	end
+end)
+
+	end,
+})
+
+local VTab = Window:CreateTab("Visuals", nil) -- Title, Image
+local Section = VTab:CreateSection("Hitbox")
+
+local Toggle = VTab:CreateToggle({
+   Name = "ESP",
+   CurrentValue = false,
+   Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+   local Players = game:GetService("Players"):GetChildren()
+local RunService = game:GetService("RunService")
+local highlight = Instance.new("Highlight")
+highlight.Name = "Highlight"
+
+for i, v in pairs(Players) do
+    repeat wait() until v.Character
+    if not v.Character:FindFirstChild("HumanoidRootPart"):FindFirstChild("Highlight") then
+        local highlightClone = highlight:Clone()
+        highlightClone.Adornee = v.Character
+        highlightClone.Parent = v.Character:FindFirstChild("HumanoidRootPart")
+        highlightClone.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+        highlightClone.Name = "Highlight"
+    end
+end
+
+game.Players.PlayerAdded:Connect(function(player)
+    repeat wait() until player.Character
+    if not player.Character:FindFirstChild("HumanoidRootPart"):FindFirstChild("Highlight") then
+        local highlightClone = highlight:Clone()
+        highlightClone.Adornee = player.Character
+        highlightClone.Parent = player.Character:FindFirstChild("HumanoidRootPart")
+        highlightClone.Name = "Highlight"
+    end
+end)
+
+game.Players.PlayerRemoving:Connect(function(playerRemoved)
+    playerRemoved.Character:FindFirstChild("HumanoidRootPart").Highlight:Destroy()
+end)
+
+RunService.Heartbeat:Connect(function()
+    for i, v in pairs(Players) do
+        repeat wait() until v.Character
+        if not v.Character:FindFirstChild("HumanoidRootPart"):FindFirstChild("Highlight") then
+            local highlightClone = highlight:Clone()
+            highlightClone.Adornee = v.Character
+            highlightClone.Parent = v.Character:FindFirstChild("HumanoidRootPart")
+            highlightClone.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+            highlightClone.Name = "Highlight"
+            task.wait()
+        end
+end
+end)
+   end,
+})
+
+local Toggle = VTab:CreateToggle({
+   Name = "Tracers",
+   CurrentValue = false,
+   Flag = "Toggle2", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+  getgenv().ESPTracers = true
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local function AssignTracers()
+    pcall(function()
+        for _, player in pairs(Players:GetPlayers()) do
+
+            if player ~= LocalPlayer then
+                local PlayerChar = game.Workspace:FindFirstChild(player.Name)
+                local LocalChar = LocalPlayer.Character
+
+                local beam
+                if PlayerChar and LocalChar then
+                    if PlayerChar:FindFirstChild("ESPBeam") then
+                        beam = PlayerChar:FindFirstChild("ESPBeam")
+                        if beam then
+                            beam.Enabled = getgenv().ESPTracers
+                            local attachment0 = Instance.new("Attachment", LocalChar:WaitForChild("HumanoidRootPart"))
+                            beam.Attachment0 = attachment0
+                        end
+                    end
+
+                    if getgenv().ESPTracers and not beam then
+                        local attachment0 = Instance.new("Attachment", LocalChar:WaitForChild("HumanoidRootPart"))
+                        local attachment1 = Instance.new("Attachment", PlayerChar:WaitForChild("HumanoidRootPart"))
+
+                        beam = Instance.new("Beam")
+                        beam.Name = "ESPBeam"
+                        beam.Enabled = true
+                        beam.Attachment0 = attachment0
+                        beam.Attachment1 = Attachment1
+                        beam.Color = ColorSequence.new(Color3.fromRGB(0,255,0))
+                        beam.FaceCamera = true
+                        beam.Width0 = 0.1
+                        beam.Width1 = 0.1
+                        beam.Parent = PlayerChar
+                    end
+                end
+            end
+        end
+    end)
+end
+
+AssignTracers()
+
+game.Players.PlayerAdded:Connect(function(player)
+    repeat wait() until player.Character
+    AssignTracers()
+end)
+
+LocalPlayer.CharacterAdded:Connect(function()
+    repeat wait() until LocalPlayer.Character or wait(2)
+    AssignTracers()
+end)
+	end,
+})
+local Button = VTab:CreateButton({
+   Name = "HBE",
+   Callback = function()
+   function getplrsname()
+for i,v in pairs(game:GetChildren()) do
+if v.ClassName == "Players" then
+return v.Name
+end
+end
+end
+hitboxsizevar = Vector3.new(1.5,1.5,1.5)
+local players = getplrsname()
+local plr = game[players].LocalPlayer
+coroutine.resume(coroutine.create(function()
+while  wait(1) do
+coroutine.resume(coroutine.create(function()
+for _,v in pairs(game[players]:GetPlayers()) do
+if v.Name ~= plr.Name and v.Character then
+v.Character.RightUpperLeg.CanCollide = false
+v.Character.RightUpperLeg.Transparency = 10
+v.Character.RightUpperLeg.Size = hitboxsizevar
+v.Character.LeftUpperLeg.CanCollide = false
+v.Character.LeftUpperLeg.Transparency = 10
+v.Character.LeftUpperLeg.Size = hitboxsizevar
+v.Character.HeadHB.CanCollide = false
+v.Character.HeadHB.Transparency = 10
+v.Character.HeadHB.Size = hitboxsizevar
+
+v.Character.HumanoidRootPart.CanCollide = false
+v.Character.HumanoidRootPart.Transparency = 10
+v.Character.HumanoidRootPart.Size = hitboxsizevar
+
+end
+end
+end))
+end
+end))
+   end,
+})
+local ATab = Window:CreateTab("Aimbot", nil) -- Title, Image
+local Section = ATab:CreateSection("Ultimate Chair Buttons")
+
+local Button = ATab:CreateButton({
+   Name = "AIMBOT",
+   Callback = function()
+   --[[
+getgenv().AimPart = "HumanoidRootPart" -- For R15 Games: {UpperTorso, LowerTorso, HumanoidRootPart, Head} | For R6 Games: {Head, Torso, HumanoidRootPart}
+getgenv().AimlockToggleKey = "Y" -- Toggles Aimbot On/Off 
+getgenv().AimRadius = 50 -- How far away from someones character you want to lock on at
+getgenv().ThirdPerson = false -- Locking onto someone in your Third Person POV
+getgenv().FirstPerson = true -- Locking onto someone in your First Person POV
+getgenv().TeamCheck = false -- Check if Target is on your Team (True means it wont lock onto your teamates, false is vice versa) (Set it to false if there are no teams)
+getgenv().PredictMovement = true -- Predicts if they are moving in fast velocity (like jumping) so the aimbot will go a bit faster to match their speed 
+getgenv().PredictionVelocity = 10 -- The speed of the PredictMovement feature 
+]]--
+
+getgenv().CiazwareUniversalAimbotLoadingTime = tick()
+if CiazwareUniversalAimbotLoaded == true then
+    Notify("DreaminGZ", "Script Loaded Already", "", 3)
+    return 
+end
+
+local Players, Uis, RService, SGui = game:GetService"Players", game:GetService"UserInputService", game:GetService"RunService", game:GetService"StarterGui";
+local Client, Mouse, Camera, CF, RNew, Vec3, Vec2 = Players.LocalPlayer, Players.LocalPlayer:GetMouse(), workspace.CurrentCamera, CFrame.new, Ray.new, Vector3.new, Vector2.new;
+local Aimlock, MousePressed, CanNotify = true, false, false;
+local AimlockTarget;
+getgenv().CiazwareUniversalAimbotLoaded = true
+
+getgenv().SeparateNotify = function(title, text, icon, time) 
+    SGui:SetCore("SendNotification",{
+        Title = title;
+        Text = text;
+        Icon = "rbxassetid://5793181157";
+        Duration = time;
+    })
+end
+
+getgenv().Notify = function(title, text, icon, time)
+    if CanNotify == true then 
+        if not time or not type(time) == "number" then time = 3 end
+        SGui:SetCore("SendNotification",{
+            Title = title;
+            Text = text;
+            Icon = "rbxassetid://5793181157";
+            Duration = time;
+        }) 
+    end
+end
+
+getgenv().WorldToViewportPoint = function(P)
+    return Camera:WorldToViewportPoint(P)
+end
+
+getgenv().WorldToScreenPoint = function(P)
+    return Camera.WorldToScreenPoint(Camera, P)
+end
+
+getgenv().GetObscuringObjects = function(T)
+    if T and T:FindFirstChild(getgenv().AimPart) and Client and Client.Character:FindFirstChild("Head") then 
+        local RayPos = workspace:FindPartOnRay(RNew(
+            T[getgenv().AimPart].Position, Client.Character.Head.Position)
+        )
+        if RayPos then return RayPos:IsDescendantOf(T) end
+    end
+end
+
+getgenv().GetNearestTarget = function()
+    -- Credits to whoever made this, i didnt make it, and my own mouse2plr function kinda sucks
+    local players = {}
+    local PLAYER_HOLD  = {}
+    local DISTANCES = {}
+    for i, v in pairs(Players:GetPlayers()) do
+        if v ~= Client then
+            table.insert(players, v)
+        end
+    end
+    for i, v in pairs(players) do
+        if v.Character ~= nil then
+            local AIM = v.Character:FindFirstChild("Head")
+            if getgenv().TeamCheck == true and v.Team ~= Client.Team then
+                local DISTANCE = (v.Character:FindFirstChild("Head").Position - game.Workspace.CurrentCamera.CFrame.p).magnitude
+                local RAY = Ray.new(game.Workspace.CurrentCamera.CFrame.p, (Mouse.Hit.p - game.Workspace.CurrentCamera.CFrame.p).unit * DISTANCE)
+                local HIT,POS = game.Workspace:FindPartOnRay(RAY, game.Workspace)
+                local DIFF = math.floor((POS - AIM.Position).magnitude)
+                PLAYER_HOLD[v.Name .. i] = {}
+                PLAYER_HOLD[v.Name .. i].dist= DISTANCE
+                PLAYER_HOLD[v.Name .. i].plr = v
+                PLAYER_HOLD[v.Name .. i].diff = DIFF
+                table.insert(DISTANCES, DIFF)
+            elseif getgenv().TeamCheck == false and v.Team == Client.Team then 
+                local DISTANCE = (v.Character:FindFirstChild("Head").Position - game.Workspace.CurrentCamera.CFrame.p).magnitude
+                local RAY = Ray.new(game.Workspace.CurrentCamera.CFrame.p, (Mouse.Hit.p - game.Workspace.CurrentCamera.CFrame.p).unit * DISTANCE)
+                local HIT,POS = game.Workspace:FindPartOnRay(RAY, game.Workspace)
+                local DIFF = math.floor((POS - AIM.Position).magnitude)
+                PLAYER_HOLD[v.Name .. i] = {}
+                PLAYER_HOLD[v.Name .. i].dist= DISTANCE
+                PLAYER_HOLD[v.Name .. i].plr = v
+                PLAYER_HOLD[v.Name .. i].diff = DIFF
+                table.insert(DISTANCES, DIFF)
+            end
+        end
+    end
+    
+    if unpack(DISTANCES) == nil then
+        return nil
+    end
+    
+    local L_DISTANCE = math.floor(math.min(unpack(DISTANCES)))
+    if L_DISTANCE > getgenv().AimRadius then
+        return nil
+    end
+    
+    for i, v in pairs(PLAYER_HOLD) do
+        if v.diff == L_DISTANCE then
+            return v.plr
+        end
+    end
+    return nil
+end
+
+--[[getgenv().CheckTeamsChildren = function()
+    if workspace and workspace:FindFirstChild"Teams" then 
+        if getgenv().TeamCheck == true then
+            if #workspace.Teams:GetChildren() == 0 then 
+                getgenv().TeamCheck = false 
+                SeparateNotify("Ciazware", "TeamCheck set to: "..tostring(getgenv().TeamCheck).." because there are no teams!", "", 3)
+            end
+        end
+    end
+end
+CheckTeamsChildren()
+]]--
+
+--[[getgenv().GetNearestTarget = function()
+    local T;
+    for _, p in next, Players:GetPlayers() do 
+        if p ~= Client then 
+            if p.Character and p.Character:FindFirstChild(getgenv().AimPart) then 
+                if getgenv().TeamCheck == true and p.Team ~= Client.Team then 
+                    local Pos, ScreenCheck = WorldToScreenPoint(p.Character[getgenv().AimPart].Position)
+                    Pos = Vec2(Pos.X, Pos.Y)
+                    local MPos = Vec2(Mouse.X, Mouse.Y) -- Credits to CriShoux for this
+                    local Distance = (Pos - MPos).Magnitude;
+                    if Distance < getgenv().AimRadius then 
+                        T = p 
+                    end
+                elseif getgenv().TeamCheck == false and p.Team == Client.Team then 
+                    local Pos, ScreenCheck = WorldToScreenPoint(p.Character[getgenv().AimPart].Position)
+                    Pos = Vec2(Pos.X, Pos.Y)
+                    local MPos = Vec2(Mouse.X, Mouse.Y) -- Credits to CriShoux for this
+                    local Distance = (Pos - MPos).Magnitude;
+                    if Distance < getgenv().AimRadius then 
+                        T = p 
+                    end
+                end
+            end
+        end
+    end
+    if T then 
+        return T
+    end
+end]]--
+
+Uis.InputBegan:Connect(function(Key)
+    if not (Uis:GetFocusedTextBox()) then 
+        if Key.UserInputType == Enum.UserInputType.MouseButton2 then 
+            pcall(function()
+                if MousePressed ~= true then MousePressed = true end 
+                local Target;Target = GetNearestTarget()
+                if Target ~= nil then 
+                    AimlockTarget = Target
+                    Notify("Ciazware", "Aimlock Target: "..tostring(AimlockTarget), "", 3)
+                end
+            end)
+        end
+        if Key.KeyCode == Enum.KeyCode[AimlockToggleKey] then 
+            Aimlock = not Aimlock
+            Notify("Ciazware", "Aimlock: "..tostring(Aimlock), "", 3)
+        end
+    end
+end)
+Uis.InputEnded:Connect(function(Key)
+    if not (Uis:GetFocusedTextBox()) then 
+        if Key.UserInputType == Enum.UserInputType.MouseButton2 then 
+            if AimlockTarget ~= nil then AimlockTarget = nil end
+            if MousePressed ~= false then 
+                MousePressed = false 
+            end
+        end
+    end
+end)
+
+RService.RenderStepped:Connect(function()
+    if getgenv().FirstPerson == true and getgenv().ThirdPerson == false then 
+        if (Camera.Focus.p - Camera.CoordinateFrame.p).Magnitude <= 1 then 
+            CanNotify = true 
+        else 
+            CanNotify = false 
+        end
+    elseif getgenv().ThirdPerson == true and getgenv().FirstPerson == false then 
+        if (Camera.Focus.p - Camera.CoordinateFrame.p).Magnitude > 1 then 
+            CanNotify = true 
+        else 
+            CanNotify = false 
+        end
+    end
+    if Aimlock == true and MousePressed == true then 
+        if AimlockTarget and AimlockTarget.Character and AimlockTarget.Character:FindFirstChild(getgenv().AimPart) then 
+            if getgenv().FirstPerson == true then
+                if CanNotify == true then
+                    if getgenv().PredictMovement == true then 
+                        Camera.CFrame = CF(Camera.CFrame.p, AimlockTarget.Character[getgenv().AimPart].Position + AimlockTarget.Character[getgenv().AimPart].Velocity/PredictionVelocity)
+                    elseif getgenv().PredictMovement == false then 
+                        Camera.CFrame = CF(Camera.CFrame.p, AimlockTarget.Character[getgenv().AimPart].Position)
+                    end
+                end
+            elseif getgenv().ThirdPerson == true then 
+                if CanNotify == true then
+                    if getgenv().PredictMovement == true then 
+                        Camera.CFrame = CF(Camera.CFrame.p, AimlockTarget.Character[getgenv().AimPart].Position + AimlockTarget.Character[getgenv().AimPart].Velocity/PredictionVelocity)
+                    elseif getgenv().PredictMovement == false then 
+                        Camera.CFrame = CF(Camera.CFrame.p, AimlockTarget.Character[getgenv().AimPart].Position)
+                    end
+                end 
+            end
+        end
+    end
+end)
+
+SeparateNotify("Ciazware", "Universal Aimbot loaded in: "..string.format("%.7f", tostring(tick() - CiazwareUniversalAimbotLoadingTime)), "", 3)
+   end,
+})
+
+local Button = VTab:CreateButton({
+   Name = "FeKILL",
+   Callback = function()
+   repeat wait() until game:IsLoaded() and game:WaitForChild"Players"
+
+local Players, RStorage, RService, TPService, SGui = game:GetService"Players", game:GetService"ReplicatedStorage", game:GetService"RunService", game:GetService"TeleportService", game:GetService"StarterGui";
+local Client, Camera, CF, Vec3, UD, UD2, Prefix = Players.LocalPlayer, workspace.CurrentCamera, CFrame.new, Vector3.new, UDim.new, UDim2.new, "/e ";
+local Feloop, Spamming, FeloopTarget, WordToSpam = false, false, nil, nil;
+local BlacklistedItems, Commands, LoadingTime = {"BoomBox", "Radio", "DualGoldenSuperFlyBoombox"}, {}, tick();
+    
+coroutine.wrap(function()
+    if not getrawmetatable then 
+        return Notify("xaxa", "Exploit not supported, function missing: getrawmetatable", "", 3)
+    end
+end)()
+
+Commands["Fekill"] = {
+    ["Aliases"] = {"feloop", "fekill", "fe", "kill"};
+    ["Description"] = "Sets your Fekill/loop Target and kills them";
+};
+Commands["Unfekill"] = {
+    ["Aliases"] = {"unfeloop", "unfekill", "unfe", "unkill"};
+    ["Description"] = "Stops killing your Fekill Target";
+};
+Commands["Rejoin"] = {
+    ["Aliases"] = {"rejoin", "rj"};
+    ["Description"] = "Rejoins your current game";
+};
+
+function PrintCommands()
+    local CommandFound, TotalCommands = "", 0;
+    for _, C in next, Commands do 
+        if C.Aliases and C.Description then 
+            CommandFound = ""..(CommandFound).."["..table.concat(C.Aliases, ", ").."] - "..(C.Description).."\n";
+            TotalCommands = TotalCommands + 1
+        end
+    end
+    
+    local ToPrint = [[
+    
+    
+FeKill/Loop/Fling - by xix on v3rm/xaxa/zxciaz/fiviefourteen
+=================================================
+Commands (Make sure to put /e or your prefix before them):
+==========================================================
+]]..CommandFound..[[
+
+=====================
+
+Total Commands: ]]..(TotalCommands)..[[
+]]
+print(ToPrint)
+end
+PrintCommands()
+    
+function GetPlayer(Name)
+    local FoundPlayer = nil
+    local GP = Players:GetPlayers()
+    for _, FS in next, GP do 
+        if string.sub(string.lower(tostring(FS)), 1, #Name) == Name then
+            FoundPlayer = FS;return FS
+        end
+    end
+    if FoundPlayer and FoundPlayer ~= nil then 
+        return FoundPlayer
+    else 
+        return Notify("xaxa", "Player not found!", "", 3)
+    end
+end
+
+function Notify(Title, Text, Icon, Time)
+    if SGui then 
+        SGui:SetCore("SendNotification", {
+            Title = Title;
+            Text = Text;
+            Icon = "";
+            Duration = Time;
+        }) 
+    end
+end
+
+function ChatSpy()
+    local ChatSpyFrame = Client.PlayerGui:FindFirstChild("Chat").Frame
+    if ChatSpyFrame.ChatChannelParentFrame.Visible == false then 
+        ChatSpyFrame.ChatChannelParentFrame.Visible = true
+        ChatSpyFrame.ChatBarParentFrame.Position = ChatSpyFrame.ChatChannelParentFrame.Position + UD2(UD(), ChatSpyFrame.ChatChannelParentFrame.Size.Y)
+    end
+end
+ChatSpy()
+
+function ResetCharacter()
+    if Client and Client.Character and Client.Character:FindFirstChildOfClass"Humanoid" then 
+        Client.Character.Humanoid:ChangeState(15)
+    end
+end
+
+function Chat(Word)
+    if RStorage and RStorage:FindFirstChild"DefaultChatSystemChatEvents" then 
+        RStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(tostring(Word), "All")
+    end
+end
+    
+function ChattedEvent(Msg)
+    if string.sub(string.lower(Msg), 1, #Prefix) == Prefix then
+        args = string.split(string.sub(string.lower(Msg), #Prefix + 1), " ")
+        if args[1] == "feloop" or args[1] == "fekill" or args[1] == "fe" or args[1] == "kill" then
+            if args[2] then 
+                FeloopTarget = GetPlayer(args[2])
+                if FeloopTarget and FeloopTarget ~= nil and FeloopTarget ~= tostring(Client) then 
+                    Feloop = true;ResetCharacter();Notify("nixwwa", "Feloop Target: "..tostring(FeloopTarget), "", 3)
+                end
+            elseif not args[2] then 
+                Feloop = true;Notify("nixwwa", "Feloop: "..tostring(Feloop), "", 3)
+            end
+        elseif args[1] == "unfeloop" or args[1] == "unfekill" or args[1] == "unfe" or args[1] == "unkill"  then 
+            Feloop = false;ResetCharacter();Notify("nixwwa", "Feloop: "..tostring(Feloop), "", 3)
+        elseif args[1] == "rejoin" or args[1] == "rj" then 
+            TPService:Teleport(game.PlaceId, Client)
+        end
+    end
+end
+Client.Chatted:Connect(ChattedEvent)
+
+local rm = getrawmetatable(game) or debug.getrawmetatable(game) or getmetatable(game) or debug.getmetatable(game)
+if setreadonly then setreadonly(rm, false) else make_writeable(rm, true) end 
+local closure, caller = newcclosure or read_me or function(f) return f end, checkcaller or is_protosmasher_caller;
+local ncall = rm.__namecall
+
+rm.__namecall = closure(function(self, ...)
+    local Args, Method = {...}, getnamecallmethod() or get_namecall_method();
+    if Method == "LoadAnimation" and Feloop == true then 
+        return wait(9e9)
+    end
+    if Method == "Kick" then 
+        return wait(9e9)
+    end
+    if game.PlaceId == 455366377 then 
+        if Method == "FireServer" and self.Name == "Input" then
+            if Args[1] == "bv" or Args[1] == "hb" or Args[1] == "ws" then 
+                return wait(9e9)
+            end
+        end
+    end
+    if Method == "FireServer" and not self.Name == "SayMessageRequest" then 
+        if self.Name == "ReplicatedStorage" or self.Name == "lIII" or Args[1] == "hey" then 
+            return wait(9e9)
+        end
+    end
+    return ncall(self, unpack(Args))
+end)
+if setreadonly then setreadonly(rm, true) else make_writeable(rm, false) end 
+
+RService.Stepped:Connect(function()
+    if Feloop == true then 
+        if Client and Client.Character and Client.Character:FindFirstChild"Right Leg" and Client.Character:FindFirstChildOfClass"Humanoid" then
+            Client.Character:WaitForChild"Right Leg":Destroy()
+            local NewHum = Client.Character.Humanoid:Clone()
+            Client.Character.Humanoid:Destroy()
+            NewHum.Parent = Client.Character;Camera.CameraSubject = Client.Character
+        end
+        for _, v in next, Client.Backpack:GetChildren() do 
+            if game.PlaceId == 455366377 or game.PlaceId == 4669040 then 
+                if v and v:IsA"Tool" and not table.find(BlacklistedItems, v.Name) then 
+                    v.Parent = Client.Character
+                    v.Handle.CanCollide = true 
+                    v.Handle.Massless = true
+                    wait()
+                    v.Grip = CF(0, 9000, 0)
+                end
+            elseif game.PlaceId ~= 455366377 or game.PlaceId ~= 4669040 then 
+                if v and v:IsA"Tool" then 
+                    v.Parent = Client.Character
+                    v.Handle.CanCollide = true 
+                    v.Handle.Massless = true
+                    wait()
+                    v.Grip = CF(0, 9000, 0)
+                end
+            end
+        end
+        if FeloopTarget and FeloopTarget.Character then
+            local ClientPF = Client.Character:FindFirstChild"HumanoidRootPart" or Client.Character:FindFirstChild"Torso";
+            local TargetPF;
+            if FeloopTarget.Character.Humanoid.RigType == Enum.HumanoidRigType.R15 then 
+                TargetPF = FeloopTarget.Character:FindFirstChild"Head"
+            elseif FeloopTarget.Character.Humanoid.RigType == Enum.HumanoidRigType.R6 then 
+                TargetPF = FeloopTarget.Character:FindFirstChild"Torso" 
+            end
+            local FlingPF = FeloopTarget.Character:FindFirstChild"Right Arm" or TargetPF;
+            if ClientPF and FlingPF then 
+                workspace.FallenPartsDestroyHeight = -9000
+                pcall(function() 
+                    ClientPF.CFrame = TargetPF.CFrame
+                    wait()
+                    ClientPF.CFrame = FlingPF.CFrame * CF(0, 9000, 0)
+                end)
+            end
+        end
+    end
+end)
+
+Players.PlayerAdded:Connect(function(Player)
+    if tostring(FeloopTarget) == tostring(Player) then 
+        FeloopTarget = Player
+        Feloop = true 
+    end
+end)
+Players.PlayerRemoving:Connect(function(Player)
+    if tostring(FeloopTarget) == tostring(Player) then 
+        FeloopTarget = nil
+        Feloop = false 
+    end
+end)
+ 
+Notify("nixwwa", "PRESS F9 FOR THE FUCKING COMMANDS", "", 3)
+Notify("nixwwa", "Script loaded in: "..string.sub(tostring(tick() - LoadingTime), 1, 6), "", 3)
+   end,
+})
